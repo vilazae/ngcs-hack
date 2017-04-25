@@ -31,6 +31,7 @@ hackApp.service( 'AuthService', [ '$q', 'ApiService', function ( $q, ApiService 
 
     return {
         isLogged : isLogged,
+        getToken : getToken,
         logout   : logout,
         login    : login
     }
