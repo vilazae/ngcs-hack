@@ -10,8 +10,52 @@ hackApp.service( 'ApiService', [ '$resource', function ( $resource ) {
                 return angular.toJson( info );
             },
             isArray : true
+		},
+        listServers : {
+            url     :  'http://vmlazaro.esy.es/ngcs/www/api/apiIndex.php/servers',
+            method  : 'GET',
+            params  : {
+            },
+            transformRequest : function ( data ) {
+                var info = { };
+                return angular.toJson( info );
+            },
+            isArray : true
+        },
+        listLoadBalancers : {
+            url     :  'http://vmlazaro.esy.es/ngcs/www/api/apiIndex.php/load_balancers',
+            method  : 'GET',
+            params  : {
+            },
+            transformRequest : function ( data ) {
+                var info = { };
+                return angular.toJson( info );
+            },
+            isArray : true
+        },
+        listFirewallPolicies : {
+            url     :  'http://vmlazaro.esy.es/ngcs/www/api/apiIndex.php/firewall_policies',
+            method  : 'GET',
+            params  : {
+            },
+            transformRequest : function ( data ) {
+                var info = { };
+                return angular.toJson( info );
+            },
+            isArray : true
+        },
+        callMethod : {
+            url     :  'http://vmlazaro.esy.es/ngcs/www/api/apiIndex.php/login',
+            method  : 'POST',
+            params  : {
 
-		}
+            },
+            transformRequest : function ( data ) {
+                var info = { token : data.token };
+                return angular.toJson( info );
+            },
+            isArray : true
+        }
 	} );
 
 } ] );
