@@ -3,7 +3,7 @@ hackApp.service( 'AuthService', [ '$q', 'ApiService', function ( $q, ApiService 
     me.token = undefined;
 
     var isLogged = function ( ) {
-        return angular.isDefined( token );
+        return angular.isDefined( me.token );
     };
 
     var getToken = function ( ) {
