@@ -1,7 +1,7 @@
 hackApp.service( 'ApiService', [ '$resource', function ( $resource ) {
-	return $resource('http://vmlazaro.esy.es/ngcs/www/api/apiIndex.php/', {}, {
+	return $resource('http://74.208.124.117/www/api/apiIndex.php/', {}, {
 		login : {
-            url     :  'http://vmlazaro.esy.es/ngcs/www/api/apiIndex.php/login',
+            url     :  'http://74.208.124.117/www/api/apiIndex.php/login',
             method  : 'POST',
             params  : {
             },
@@ -12,7 +12,7 @@ hackApp.service( 'ApiService', [ '$resource', function ( $resource ) {
             isArray : true
 		},
         listServers : {
-            url     :  'http://vmlazaro.esy.es/ngcs/www/api/apiIndex.php/servers',
+            url     :  'http://74.208.124.117/www/api/apiIndex.php/servers',
             method  : 'GET',
             params  : {
             },
@@ -23,7 +23,7 @@ hackApp.service( 'ApiService', [ '$resource', function ( $resource ) {
             isArray : true
         },
         listLoadBalancers : {
-            url     :  'http://vmlazaro.esy.es/ngcs/www/api/apiIndex.php/load_balancers',
+            url     :  'http://74.208.124.117/www/api/apiIndex.php/load_balancers',
             method  : 'GET',
             params  : {
             },
@@ -34,7 +34,18 @@ hackApp.service( 'ApiService', [ '$resource', function ( $resource ) {
             isArray : true
         },
         listFirewallPolicies : {
-            url     :  'http://vmlazaro.esy.es/ngcs/www/api/apiIndex.php/firewall_policies',
+            url     :  'http://74.208.124.117/www/api/apiIndex.php/firewall_policies',
+            method  : 'GET',
+            params  : {
+            },
+            transformRequest : function ( data ) {
+                var info = { };
+                return angular.toJson( info );
+            },
+            isArray : true
+        },
+        listSharedStorage : {
+            url     :  'http://74.208.124.117/www/api/apiIndex.php/shared_storages',
             method  : 'GET',
             params  : {
             },
@@ -45,7 +56,7 @@ hackApp.service( 'ApiService', [ '$resource', function ( $resource ) {
             isArray : true
         },
         callMethod : {
-            url     :  'http://vmlazaro.esy.es/ngcs/www/api/apiIndex.php/login',
+            url     :  'http://74.208.124.117/www/api/apiIndex.php/login',
             method  : 'POST',
             params  : {
 

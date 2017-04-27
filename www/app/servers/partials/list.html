@@ -1,0 +1,643 @@
+
+<link rel="stylesheet" href="./assets/panel.css">
+<div id="mainSection" ui-view="mainSection" class="">
+
+<div class="wrapper">
+    <div class="row">
+        <div class="col-xs-12 col-sm-6 col-md-7">
+            <h1 translate="APP.DATACENTER.INFRASTRUCTURE.SERVERS.LIST.HEADING.TITLE">Servers</h1>
+        </div>
+    </div>
+
+
+
+    <div class="well bar-buttons">
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 buttons">
+            <button ui-sref="servers-create" analytics-on="click" analytics-category="servers" analytics-label="create" type="button" class="btn btn-primary" id="servers-create-button" apply-permissions="{section: 'SERVERS', permissions:['CREATE']}" href="#/servers/create">
+                <span class="icon icon-create"></span>Create
+            </button>
+            <div class="btn-group open">
+                <button type="button" class="btn btn-info dropdown-toggle " data-toggle="dropdown" aria-expanded="true" ng-click="ctrl.showMenu = !ctrl.showMenu">
+                <span class="icon icon-actions"></span>Actions<span class="caret"></span></button>
+                <ul class="dropdown-menu" role="menu" ng-if="ctrl.showMenu">
+                    <!--<li ng-class="{'disabled':list.optionDisabled('start')}" apply-permissions class="permissions-disable" >-->
+                    <li ng-class="{'disabled':list.optionDisabled('start')}" class="disabled">
+                    <a ng-disabled="list.optionDisabled('start')" ng-click="!list.optionDisabled('start') &amp;&amp; list.startServer()" apply-permissions="{section: 'SERVERS', permissions:['START']}" disabled="disabled">Start</a>
+                    </li>
+                    <li ng-class="{'disabled':list.optionDisabled('reboot')}" class="permissions-disable" style="">
+                        <a ng-disabled="list.optionDisabled('reboot')" size="sm" modal-confirm="" element="list.selectedServer" modal-template="app/servers/partials/list/reboot.html" modal-body="The server <strong crop-text='Web Hack'></strong> will be restarted." confirm-function="list.rebootServer" check-to-confirm="modal.hardware !== undefined" apply-permissions="{section: 'SERVERS', permissions:['RESTART']}">Restart</a></li>
+                    <li ng-class="{'disabled':list.optionDisabled('stop')}" class="">
+                        <a ng-disabled="list.optionDisabled('stop')" size="sm" modal-confirm="" element="list.selectedServer" modal-template="app/servers/partials/list/stop.html" modal-body="The server <strong crop-text='Web Hack'></strong> will be shut down." confirm-function="list.stopServer" check-to-confirm="modal.hardware !== undefined" apply-permissions="{section: 'SERVERS', permissions:['SHUTDOWN']}">Shut Down</a></li>
+                    <li ng-class="{'disabled':list.optionDisabled('remove')}" class="">
+                        <a ng-disabled="list.optionDisabled('remove')" modal-confirm="" element="list.selectedServer" other-info="list.otherInfo" modal-template="app/servers/partials/list/remove.html" modal-body="The server <strong crop-text='Web Hack'></strong> will be deleted." confirm-function="list.removeServer" check-to-confirm="modal.confirmRemove" ng-click="list.updateVariables()" apply-permissions="{section: 'SERVERS', permissions:['DELETE']}">Delete</a></li>
+
+
+                    <li ng-class="{'disabled':list.optionDisabled('kvm')}" class="">
+                        <a ng-class="{'disabled':list.optionDisabled('kvm')}" ng-click="!list.optionDisabled('kvm') &amp;&amp; list.consoleKvm()" apply-permissions="{section: 'SERVERS', permissions:['ACCESSKVMCONSOLE']}" class="" style="">Access KVM Console</a>
+                    </li>
+
+                    <li class="divider"></li>
+                    <!----><li ng-class="{'disabled': list.optionDisabled('resize')}" ng-if="list.selectedServerIsVirtualMachine" class="">
+                        <a ng-disabled="list.optionDisabled('resize')" ng-click="!list.optionDisabled('resize') &amp;&amp; list.resizeServer()" apply-permissions="{section: 'SERVERS', permissions:['RESIZE']}">Customise</a>
+                    </li><!---->
+                    <li ng-class="{'disabled': list.optionDisabled('reinstall')|| (list.selectedServer &amp;&amp; list.selectedServer.ips.length==0)}" class="">
+                        <a ng-disabled="list.optionDisabled('reinstall') || (list.selectedServer &amp;&amp; list.selectedServer.ips.length==0)" ng-click="!list.optionDisabled('reinstall') &amp;&amp; list.selectedServer &amp;&amp; list.selectedServer.ips.length>0 &amp;&amp; list.reinstallImage()" apply-permissions="{section: 'SERVERS', permissions:['REINSTALL']}">Reinstall Image</a>
+                    </li>
+                    <li class="divider"></li>
+                    <!----><li ng-if="list.isCloneWarning === false &amp;&amp; list.selectedServerIsVirtualMachine" ng-class="{'disabled':list.optionDisabled('clone')}" class="">
+                       <a ng-disabled="list.optionDisabled('clone')" modal-confirm="" size="" element="list.selectedServer" modal-template="app/servers/partials/list/clone.html" other-info="list.clonetext" confirm-function="list.clone" apply-permissions="{section: 'SERVERS', permissions:['CLONE']}">Clone</a>
+                    </li><!---->
+                    <!---->
+                    <!----><li ng-class="{'disabled':list.optionDisabled('snapshot')}" ng-if="list.selectedServerIsVirtualMachine" class="">
+                        <a apply-permissions="{section: 'SERVERS', permissions:['MANAGESNAPSHOT']}">Snapshots  <span class="caret"></span></a>
+                        <ul class="sub-menu">
+                            <li ng-class="{'disabled':list.optionDisabled('createsnap')}">
+                                <!----><a ng-disabled="list.optionDisabled('createsnap')" ng-if="!list.maxSnapshot()" modal-confirm="" size="sm" element="list.selectedServer" modal-template="app/servers/partials/list/createsnap.html" modal-body="<p>Creating snapshot <strong crop-text='Web Hack'>.</strong></p><p>The snapshot will automatically be deleted on <strong>30/04/2017 20:17:49</strong>.</p>" confirm-function="list.createsnap" apply-permissions="{section: 'SERVERS', permissions:['MANAGESNAPSHOT']}">Create Snapshot</a><!---->
+
+                                <!---->
+                            </li>
+                            <li ng-class="{'disabled':list.optionDisabled('consolidatesnap')}" class="disabled">
+                                <a ng-disabled="list.optionDisabled('consolidatesnap')" modal-confirm="" size="sm" element="list.selectedServer" modal-template="app/servers/partials/list/consolidatesnap.html" modal-body="The snapshot of the server <strong crop-text='Web Hack'></strong> will be deleted." confirm-function="list.consolidatesnap" apply-permissions="{section: 'SERVERS', permissions:['MANAGESNAPSHOT']}" disabled="disabled">Delete Snapshot</a></li>
+                            <li ng-class="{'disabled':list.optionDisabled('restoresnap')}" class="disabled">
+                                <a ng-disabled="list.optionDisabled('restoresnap')" modal-confirm="" size="sm" element="list.selectedServer" modal-template="app/servers/partials/list/restoresnap.html" modal-body="The server <strong crop-text='Web Hack'></strong> will be reset to the status of the snapshot from <strong>undefined undefined</strong>." confirm-function="list.restoresnap" apply-permissions="{section: 'SERVERS', permissions:['MANAGESNAPSHOT']}" disabled="disabled">Restore Snapshot</a></li>
+                        </ul>
+                    </li><!---->
+                </ul>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-info dropdown-toggle ladda-button" data-toggle="dropdown" ng-disabled="!list.selectedServer" ui-ladda="list.loadingPrices" data-style="expand-right"><span class="ladda-label">
+                    <span class="icon icon-network"></span>
+                    Network
+                    <span ng-class="{'caret' : list.loadingPrices !== true }" class="caret"></span>
+                </span><span class="ladda-spinner"></span></button>
+                <ul class="dropdown-menu" role="menu">
+                    <!-- <li><a href="#">{{"APP.DATACENTER.INFRASTRUCTURE.SERVERS.LIST.LABEL.NETWORK_INTERFACES"| translate}}</a></li> -->
+                    <li ng-class="{'disabled':(list.optionDisabled('assignip') || list.assigningIp)}" class="" style="">
+                        <a class="permissions-disable" ng-disabled="(list.optionDisabled('assignip') || list.assigningIp)" ng-click="!list.optionDisabled('assignip') &amp;&amp; !list.assigningIp &amp;&amp; list.assignIp()" apply-permissions="{section: 'SERVERS', permissions:['ASSIGNIP']}">
+                            Assign IP
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+
+            <!----><button ng-if="list.selectedServer &amp;&amp; list.selectedServerIsVirtualMachine" ng-show="list.optionDisabled('isoactive')" class="btn btn-info dvd permissions-disable" ng-disabled="list.optionDisabled('iso') || list.isos.length < 1" ng-class="{disabled:list.optionDisabled('iso')} " ui-sref="servers-iso({nameElement:list.selectedServer.id})" apply-permissions="{section: 'SERVERS', permissions:['MANAGEDVD']}" href="#/servers/AC134F9AE88504DC934891388F591C1E/iso">
+                    <span class="icon icon-dvd"></span>
+
+                    DVD Drive
+            </button><!---->
+            <!--
+
+            -->
+            <!----><button apply-permissions="{section: 'SERVERS', permissions:['MANAGEDVD']}" ng-if="list.selectedServer &amp;&amp; list.selectedServerIsVirtualMachine" ng-show="!list.optionDisabled('isoactive')" class="btn btn-info dvd permissions-disable ng-hide" ng-disabled="list.optionDisabled('iso')" ng-class="{disabled:list.optionDisabled('iso')}" uib-tooltip="" tooltip-placement="top" size="sm" modal-confirm="" modal-title="Eject DVD" modal-body="Ejecting the DVD <strong></strong> on the server <strong crop-text='Web Hack'>.</strong>" confirm-function="list.unmountISO" style="">
+                  <span class="icon icon-dvd-without"></span>
+
+                  <span crop-text="" crop-text-no-tooltip="true"><span class="cropTextContent" style="word-wrap: break-word; white-space: normal; visibility: visible;"><span class="cropText"></span><span class="postText" ng-transclude=""></span></span>
+</span>
+
+                  <!-- crop-text-uib-tooltip="{{list.getDvDApplianceText('DESC')}}" -->
+
+
+            </button><!---->
+
+        </div>
+
+        <div class="col-xs-12 col-sm-12 col-md-4 options">
+
+        </div>
+
+        <div class="clearfix"></div>
+
+    </div>
+</div>
+
+
+    <div id="list-server" class="list element " >
+        <!-- List servers -->
+        <div class="options">
+            <form class="form-inline filter_wrapper ng-pristine ng-valid" role="form">
+                <div class="form-group filter">
+                    <label for="inputEmail3" class="control-label filter_title">Filter<span class="glyphicon glyphicon-filter" aria-hidden="true"></span></label>
+                    <input type="text" ng-model="list.nameFilter" class="form-control filter_extra ng-pristine ng-untouched ng-valid ng-empty" select-on-click="" filter="">
+                </div>
+                <!--<button class="btn btn-success">CSV</button>-->
+            </form>
+        </div>
+        <table class="table table-striped table-hover">
+            <thead n class="">
+                <tr>
+                    <!-- <th ng-class="list.reverse && list.order == 'publicName' ? 'up' : 'down'" ng-click="list.changeOrder('publicName')" >Name</th>-->
+                    <th class="no-sortable center to-select"></th>
+                    <th ng-class="reverse &amp;&amp; orderBy === actualOrder ? 'up' : orderBy === actualOrder ? 'down' : ''" ng-click="onClick();" order-column="" reverse="list.reverse" order-by="public_name" actual-order="list.order" desc-field="Name" class="down">Name</th>
+                    <th ng-class="reverse &amp;&amp; orderBy === actualOrder ? 'up' : orderBy === actualOrder ? 'down' : ''" ng-click="onClick();" order-column="" reverse="list.reverse" order-by="state" actual-order="list.order" desc-field="Status">Status</th>
+                    <th ng-class="reverse &amp;&amp; orderBy === actualOrder ? 'up' : orderBy === actualOrder ? 'down' : ''" ng-click="onClick();" order-column="" reverse="list.reverse" order-by="ips" actual-order="list.order" desc-field="IP">IP</th>
+                    <!----><th ng-class="reverse &amp;&amp; orderBy === actualOrder ? 'up' : orderBy === actualOrder ? 'down' : ''" ng-click="onClick();" ng-if="list.mode.fixedServerEnabled &amp;&amp; list.mode.flexibleServerEnabled" order-column="" reverse="list.reverse" order-by="configuration_name" actual-order="list.order" desc-field="Type">Type</th><!---->
+                    <!---->
+
+                    <th ng-class="reverse &amp;&amp; orderBy === actualOrder ? 'up' : orderBy === actualOrder ? 'down' : ''" ng-click="onClick();" ng-show="list.mode.flexibleServerEnabled &amp;&amp; !list.mode.fixedServerEnabled" order-column="" reverse="list.reverse" order-by="vcpu" actual-order="list.order" desc-field="CPU" class="ng-hide">CPU</th>
+                    <th ng-class="reverse &amp;&amp; orderBy === actualOrder ? 'up' : orderBy === actualOrder ? 'down' : ''" ng-click="onClick();" ng-show="list.mode.flexibleServerEnabled &amp;&amp; !list.mode.fixedServerEnabled" order-column="" reverse="list.reverse" order-by="ram" actual-order="list.order" desc-field="RAM" class="ng-hide">RAM</th>
+                    <th ng-class="reverse &amp;&amp; orderBy === actualOrder ? 'up' : orderBy === actualOrder ? 'down' : ''" ng-click="onClick();" ng-show="list.mode.flexibleServerEnabled &amp;&amp; !list.mode.fixedServerEnabled" order-column="" reverse="list.reverse" order-by="hdd" actual-order="list.order" desc-field="SSD" class="ng-hide">SSD</th>
+                    <th ng-class="reverse &amp;&amp; orderBy === actualOrder ? 'up' : orderBy === actualOrder ? 'down' : ''" ng-click="onClick();" order-column="" reverse="list.reverse" order-by="alerts_count" actual-order="list.order" desc-field="Warnings">Warnings</th>
+                    <!----><th ng-class="reverse &amp;&amp; orderBy === actualOrder ? 'up' : orderBy === actualOrder ? 'down' : ''" ng-click="onClick();" class="dc" ng-if="list.showDc" order-column="" reverse="list.reverse" order-by="datacenter_id" actual-order="list.order" desc-field="Data centre">Data centre</th><!---->
+                </tr>
+            </thead>
+            <tbody>
+                <!---->
+                <!---->
+
+
+                <!----><!---->
+                <tr  ng-repeat="server in ctrl.servers " ng-class="{'active':server.selected}" ng-click=ctrl.selectServer(server)>
+                    <td class="center">
+                        <input ng-checked="server.selected" type="checkbox" name="server" id="radioVMAC134F9AE88504DC934891388F591C1E" checked="checked">
+                        <label for="radioVMAC134F9AE88504DC934891388F591C1E"></label>
+                    </td>
+                    <td>
+							<!--descomentar con hybrid cloud (junto a lo comnetatado en table.less)
+							<span ng-if="server.server_type"
+									class="icon"
+									ng-class="{'icon-server':server.server_type === 'bare_metal', 'icon-cloud':server.server_type === 'virtual_machine'}">
+							</span>-->
+							<span>{{server.name}}</span>
+                    </td>  
+
+                    <td>
+                        <!---->
+                        <!---->
+                        <!----><span class="label label-success">
+                        </span><!---->
+                        <!---->
+                        <!---->
+                    </td>
+                    <td>
+                        <!----><span ng-if="server.ips.length > 0">
+                            <!----><!----><span ng-repeat="ip in server.ips" ng-if="$first">74.208.124.117</span><!----><!---->
+                            <!-- <span ng&#45;if="server.ips.length > 1" class="badge badge&#45;more&#45;ips" tooltip&#45;html&#45;unsafe="{{list.displayIpsServer(server.ips)}}" tooltip&#45;placement="right" >+{{server.ips.length &#45; 1}}</span> -->
+                            <!---->
+                        </span><!---->
+
+                    </td>
+
+                    <!----><td ng-if="list.mode.fixedServerEnabled || (list.mode.fixedServerEnabled &amp;&amp; list.mode.flexibleServerEnabled)">
+                        <!---->
+                        <!----><a class="badge badge-fix" uib-tooltip-html="list.tooltipFeatures[server.id]" tooltip-placement="right" ng-if="server.configuration_name">M</a><!---->
+                    </td><!---->
+
+                    <!----><td class="os" ng-if="server.appliance.os.name">
+                        <span class="icon_Centos6"></span>
+                        <span class="system">CentOS 6</span>
+                    </td><!---->
+                    <!---->
+
+                    <td ng-show="list.mode.flexibleServerEnabled &amp;&amp; !list.mode.fixedServerEnabled" class="ng-hide">1 vCore </td>
+                    <td ng-show="list.mode.flexibleServerEnabled &amp;&amp; !list.mode.fixedServerEnabled" class="ng-hide">1.00 GB</td>
+                    <td ng-show="list.mode.flexibleServerEnabled &amp;&amp; !list.mode.fixedServerEnabled &amp;&amp; server.hdd > 0" class="ng-hide"> GB</td>
+                    <td ng-show="list.mode.flexibleServerEnabled &amp;&amp; !list.mode.fixedServerEnabled &amp;&amp; server.hdd == 0" class="ng-hide">-</td>
+                    <td>
+                        <!-- <span class="badge" ng&#45;if="server.alerts_count.warning > 0">{{server.alerts_count.warning}}</span> -->
+                        <!-- <span class="badge badge&#45;danger" ng&#45;if="server.alerts_count.critical > 0">{{server.alerts_count.critical}}</span> -->
+                        <!---->
+                        <!----><span ng-if="!server.alerts_count || server.alerts_count.length == 0">---</span><!---->
+                    </td>
+                    <!----><td class="dc" ng-if="list.showDc"><span class="flag flag-usa"></span></td><!---->
+                </tr><!----><!---->
+            </tbody>
+        </table>
+    </div>
+
+    <paginate total-items="list.filteredList.length" items-per-page="list.itemsPerPage" current-page="list.currentPage" section="vms"><!---->
+</paginate>
+</div>
+
+<!----><div ui-view="servers.detail" class=""><div id="detail-server" class="details">
+    <!-- List detail -->
+    <div class="details_title grey-3">
+        <div class="row">
+            <div class="col-xs-12 col-sm-9 col-md-9">
+                <form name="detailf" ng-model="detailf" novalidate="" class="ng-pristine ng-untouched ng-valid ng-not-empty">
+                    <ng-form name="nameForm" class="ng-pristine ng-valid">
+                        <h2 ng-class="{'has-error': nameForm.auxValue.$error.existObject || nameForm.auxValue.$error.isString || nameForm.auxValue.$error.maxlength || (nameForm.auxValue.$error.required &amp;&amp; !nameForm.auxValue.$pristine)}" ng-model="public_name" editable-element="" enable-edit="detail.canEdit()" selected-element="detail.server" property="public_name" update-function="detail.updateServerName()" type="server" is-required="true" class="permissions-enable ng-pristine ng-untouched ng-valid ng-empty" apply-permissions="{section: 'servers', permissions:['SETNAME']}"><span ng-show="!canEdit" crop-text="Web Hack" class=""><span class="cropTextContent" style="word-wrap: break-word; visibility: visible;"><span class="cropText">Web Hack</span><span class="postText" ng-transclude=""><span class="edit-inline permissions-delete" style="visibility: visible;"></span></span></span>
+</span><!----><!----></h2>
+                        <span class="has-error info-label bottom-small ng-hide" ng-show="nameForm.auxValue.$error.required &amp;&amp; !nameForm.auxValue.$pristine">Name is required.</span>
+                        <span class="has-error info-label bottom-small ng-hide" ng-show="nameForm.auxValue.$error.isString">Invalid characters entered.</span>
+                        <span class="has-error info-label bottom-small ng-hide" ng-show="nameForm.auxValue.$error.existObject">Name already exists.</span>
+                        <span class="has-error info-label bottom-small ng-hide" ng-show="nameForm.auxValue.$error.maxlength">Up to 128 characters.</span>
+                    </ng-form>
+                    <ng-form name="descForm" class="ng-pristine ng-valid">
+                        <p ng-class="{'has-error': descForm.auxValue.$error.isString || descForm.auxValue.$error.maxlength, 'default': detail.server.description === ''}" ng-model="description" editable-element="" enable-edit="detail.canEdit()" selected-element="detail.server" property="description" update-function="detail.updateServerName()" type="" is-required="false" class="permissions-enable ng-pristine ng-untouched ng-valid default ng-empty" apply-permissions="{section: 'servers', permissions:['SETDESCRIPTION']}"><span ng-show="!canEdit" crop-text="Web Hack Description" class=""><span class="cropTextContent" style="word-wrap: break-word; visibility: visible;"><span class="cropText">Web Hack Description</span><span class="postText" ng-transclude=""><span class="edit-inline permissions-delete" style="visibility: visible;"></span></span></span>
+</span><!----><!----></p>
+                        <span class="has-error info-label bottom-small ng-hide" ng-show="descForm.auxValue.$error.isString">Invalid characters entered.</span>
+                        <span class="has-error info-label bottom-small ng-hide" ng-show="descForm.auxValue.$error.maxlength">Up to 256 characters.</span>
+                    </ng-form>
+                </form>
+            </div>
+
+            <div class="col-xs-12 col-sm-3 col-md-3 element-status">
+                <!----><div class="btn-group active" ng-if="detail.showDropDownStates">
+
+                    <button type="button" class="btn dropdown-toggle btn-success" ng-class="{'btn-success':detail.server.state == 'POWERED_ON','btn-danger':detail.server.state == 'POWERED_OFF'}" data-toggle="dropdown">
+                        On
+                        <span ng-show="true" class="caret"></span>
+                    </button>
+
+
+                    <!----><ul ng-if="detail.server.state == 'POWERED_ON'" class="dropdown-menu" role="menu">
+                        <li apply-permissions="{section: 'servers', permissions:['RESTART']}" class="permissions-delete">
+                            <a href="" class="label label-info" modal-confirm="" element="list.selectedServer" size="sm" modal-template="app/servers/partials/list/reboot.html" modal-body="The server <strong crop-text='Web Hack'></strong> will be restarted." confirm-function="list.rebootServer" check-to-confirm="modal.hardware !== undefined">
+                                Restart
+                            </a>
+                        </li>
+
+                        <li apply-permissions="{section: 'servers', permissions:['SHUTDOWN']}" class="permissions-delete">
+                            <a href="" class="label label-danger" modal-confirm="" element="list.selectedServer" size="sm" modal-template="app/servers/partials/list/stop.html" modal-body="The server <strong crop-text='Web Hack'></strong> will be shut down." confirm-function="list.stopServer" check-to-confirm="modal.hardware !== undefined">
+                                Shut Down
+                            </a>
+                        </li>
+
+
+                    </ul><!---->
+
+                    <!---->
+                </div><!---->
+
+                <!---->
+            </div>
+        </div>
+    </div>
+    <div class="details-content">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-8">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-9 col-md-push-3 area-warning">
+                        <!-- <button type="button" class="btn btn&#45;warn" id="warningsLink" -->
+                        <!--         ng&#45;click="detail.openAlerts($event, 'bottom', 'popover&#45;style&#45;4', 'warning')" -->
+                        <!--         ng&#45;if="detail.server.alerts &#38;&#38; detail.server.alerts.warning &#38;&#38; detail.server.alerts.warning.length" -->
+                        <!--         ng&#45;disabled="list.optionDisabled('resize')" -->
+                        <!--         ng&#45;class="{'disabled': list.optionDisabled('resize')}"> -->
+                        <!--     {{"APP.DATACENTER.INFRASTRUCTURE.SERVERS.DETAIL.BUTTON.WARNINGS"|translate}} <a class="badge">{{detail.server.alerts.warning.length}}</a> -->
+                        <!-- </button> -->
+                        <!-- <button type="button" class="btn btn&#45;critical" id="warningsLink1" -->
+                        <!--         ng&#45;click="detail.openAlerts($event, 'bottom', 'popover&#45;style&#45;3', 'critical')" -->
+                        <!--         ng&#45;if="detail.server.alerts &#38;&#38; detail.server.alerts.critical &#38;&#38; detail.server.alerts.critical.length" -->
+                        <!--         ng&#45;disabled="list.optionDisabled('resize')" -->
+                        <!--         ng&#45;class="{'disabled': list.optionDisabled('resize')}"> -->
+                        <!--     {{"APP.DATACENTER.INFRASTRUCTURE.SERVERS.DETAIL.BUTTON.CRITICAL"|translate}} <a class="badge">{{detail.server.alerts.critical.length}}</a> -->
+                        <!-- </button> -->
+                        <!---->
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-3 col-md-pull-9">
+                      <h3 class="block-title"><span>Features</span></h3>
+                    </div>
+                </div>
+
+
+                <!----><div class="block block-to-edit-inside" ng-if="detail.server.appliance">
+
+                    <div class="row">
+                        <div class="col-xs-1 col-sm-1 col-md-1 icon-1">
+                            <span class="icon icon-setting"></span>
+                        </div>
+
+                        <!----><div class="col-xs-11 col-sm-11 col-md-11" ng-if="detail.server.appliance">
+
+                            <dl>
+                                <dt class="col-xs-12 col-sm-12 col-md-12 title-to-edit">Server:</dt>
+                                <dd></dd>
+                            </dl>
+                            <div class="block block-no-edit">
+                                <div class="block-no-edit-content">
+                                    <dl>
+                                        <dt class="col-xs-4 col-sm-4 col-md-4">Source:</dt>
+                                        <dd class="col-xs-8 col-sm-8 col-md-8">
+
+                                            <!---->
+                                            <!----><span ng-if="detail.server.appliance.type !== 'PERSONAL'">1&amp;1 Images</span><!---->
+                                            <!---->
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+                            <!-- OS REINIT -->
+                            <div class="block last block-to-edit" ng-class="{'block-no-edit': !detail.reinit,
+                                           'block-to-edit': detail.reinit,
+                                           'last':detail.server.appliance.licenses.length > 0,
+                                           'loading': detail.loadingAppliances,
+                                           'disabled': list.optionDisabled('reinit')}" ng-click="detail.reinit &amp;&amp; !list.optionDisabled('reinit') &amp;&amp; detail.openReinit($event, 'top', 'sm', 'popover-style-1');">
+                                <div ng-class="{'block-no-edit-content': !detail.reinit, 'block-to-edit-content': detail.reinit }" class="block-to-edit-content">
+                                    <dl>
+                                        <dt class="col-xs-4 col-sm-4 col-md-4">Operating system:</dt>
+                                        <dd class="col-xs-8 col-sm-8 col-md-8">
+
+
+
+                                            CentOS 6 -
+                                            64-bit
+                                            <!----><span ng-if="detail.server.appliance.subtype">
+                                            (Standard)
+                                            </span><!---->
+                                        </dd>
+                                    </dl>
+                                </div>
+                            </div>
+
+                            <!---->
+                        </div><!---->
+                    </div>
+                </div><!---->
+
+
+
+
+                <!-- actual atributos de software -->
+                <!---->
+                 <!---->
+
+
+                <!---->
+
+
+                <!-- ojo con este bloqueo:  ng-click="!list.optionDisabled('deleteips')-->
+                 <div class="block block-to-edit permissions-disable" ng-class="{'disabled': list.optionDisabled('deleteips') , 'loading': detail.disabledIps}" ng-disabled="list.optionDisabled('deleteips') || detail.disabledIps" manage-items="" items="detail.serverDetailIPs" check-changes="detail.ipCheckChanges(data)" callback="detail.deleteIPs(data)" input-type="checkbox" confirmation-message="APP.DATACENTER.INFRASTRUCTURE.SERVERS.DETAIL.LABEL.REMOVE_IP_CONFIRM" button-custom-text="APP.DATACENTER.INFRASTRUCTURE.SERVERS.DETAIL.BUTTON.REMOVE_IP" apply-permissions="{section: 'ips', permissions:['DELETE']}" refresh-items-event-name="refresh_manage_items_ips">
+                    <div class="block-to-edit-content">
+                        <div class="row">
+                            <div class="col-xs-1 col-sm-1 col-md-1 icon-2">
+                                <span class="icon icon-ip"></span>
+                            </div>
+                            <div class="col-xs-11 col-sm-11 col-md-11">
+                                <dl>
+                                    <dt class="col-xs-4 col-sm-4 col-md-4">IP:</dt>
+                                    <dd class="col-xs-8 col-sm-8 col-md-8">
+
+                                        <!----><a href="" ng-if="detail.serverIPs.length">
+                                            <!----><span ng-repeat="ip in detail.serverIPs" ng-class="{'italic':ip.dhcp}" class="italic"> 74.208.124.117 <br> </span><!---->
+                                       </a><!---->
+
+                                      <!---->
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                <!--<div class="block block-to-edit-inside permissions-disable" apply-permissions="{section: 'servers', permissions:['RESIZE']}">-->
+                <div class="block block-to-edit-inside permissions-disable" ng-class="{'disabled': list.optionDisabled('resize')}">
+                    <div class="row">
+                        <div class="col-xs-1 col-sm-1 col-md-1 icon-3">
+                            <span class="icon icon-server"></span>
+                        </div>
+                        <div class="col-xs-11 col-sm-11 col-md-11">
+                            <dl>
+                                <dt class="col-xs-12 col-sm-6 col-md-6 title-to-edit">Configuration:</dt>
+                            </dl>
+                            <div class="block block-to-edit permissions-disable" ng-click="!list.optionDisabled('resize') &amp;&amp; detail.openEdit($event, 'top', 'lg', 'popover-style-1');" apply-permissions="{section: 'servers', permissions:['RESIZE']}" ng-class="{ 'loading': detail.loadingPrices }">
+                                <div class="block-to-edit-content permissions-disable" id="editServerLink">
+                                    <!----><dl ng-if="detail.showViewElement('fixedConfiguration')">
+                                        <dt class="col-xs-4 col-sm-4 col-md-4">Type:</dt>
+                                        <!----><dd class="col-xs-8 col-sm-8 col-md-8" ng-if="detail.productType === 'fixed'"><a>Cloud Server M </a></dd><!---->
+                                        <!---->
+                                    </dl><!---->
+                                    <dl>
+                                        <dt class="col-xs-4 col-sm-4 col-md-4">CPU:</dt>
+                                        <dd class="col-xs-8 col-sm-8 col-md-8"><a>1 vCore</a></dd>
+                                    </dl>
+                                    <dl>
+                                        <dt class="col-xs-4 col-sm-4 col-md-4">RAM:</dt>
+                                        <dd class="col-xs-8 col-sm-8 col-md-8"><a>1 GB</a></dd>
+                                    </dl>
+                                    <dl>
+                                        <dt class="col-xs-4 col-sm-4 col-md-4">SSD:</dt>
+                                        <!----><dd class="col-xs-8 col-sm-8 col-md-8" ng-if="detail.productType === 'fixed'">
+                                        <!----><a ng-if="detail.billingServer.hdd.quantity > 0">50 GB</a><!---->
+                                        <!---->
+                                        </dd><!---->
+                                        <!---->
+                                    </dl>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="block block-to-edit-inside" ng-class="{'disabled': list.optionDisabled('firewalls')}">
+                    <div class="row">
+                        <div class="col-xs-1 col-sm-1 col-md-1 icon-3">
+                            <span class="icon icon-firewall"></span>
+                        </div>
+                        <div class="col-xs-11 col-sm-11 col-md-11">
+                            <dl>
+                                <dt class="col-xs-12 col-sm-12 col-md-12 title-to-edit">Firewall Policies:</dt>
+                            </dl>
+
+                            <div select-ip-items="" section="firewalls" input-type="radio"><!----><div class="block block-to-edit permissions-disable" ng-repeat="(ip, ipObjects) in detail.ipsHandlerObject[section].items" apply-permissions="{section: 'firewalls', permissions:['MANAGEATTACHEDSERVERIP']}">
+    <div>
+        <div class="block-to-edit-content permissions-disable" manage-items="" items="ipObjects" input-type="radio" callback="detail.ipsHandlerObject[section].callbackFunction(data, ip)" button-custom-text="APP.DATACENTER.INFRASTRUCTURE.SERVERS.DETAIL.BUTTON.CONFIRM" refresh-items-event-name="refresh_manage_items_firewalls_74.208.124.117" ng-disabled="list.optionDisabled(section)">
+            <dl>
+                <dt class="col-xs-4 col-sm-4 col-md-4" crop-text="74.208.124.117"><span class="cropTextContent" style="word-wrap: break-word; visibility: visible;"><span class="cropText">74.208.124.117</span><span class="postText" ng-transclude=""></span></span>
+</dt>
+                <dd class="col-xs-8 col-sm-8 col-md-8">
+                   <!----><!--| filter:{state:'POWERED_ON'}-->
+                   <!----><span ng-if="( ipObjects |filter: {checked: true}).length">
+                       <!----><span ng-repeat="element in ipObjects | filter: {checked: true} | orderBy:'text'">
+                            <!----><a href="" ng-if="!element.disabled" crop-text="Linux"><span class="cropTextContent" style="word-wrap: break-word; visibility: visible;"><span class="cropText">Linux</span><span class="postText" ng-transclude=""></span></span>
+</a><!---->
+                            <!---->
+                       </span><!---->
+                   </span><!---->
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div><!---->
+</div>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <!---->
+
+
+
+                 <div class="block block-to-edit permissions-disable disabled" ng-class="{'disabled': list.optionDisabled('privatenetworks') , 'loading': detail.disabledVlans}" ng-disabled="list.optionDisabled('privatenetworks') || detail.disabledIps" manage-items="" items="detail.serverDetailVlans" callback="detail.deleteVlans(data)" input-type="checkbox" button-custom-text="APP.DATACENTER.INFRASTRUCTURE.SERVERS.DETAIL.BUTTON.REMOVE_VLAN" apply-permissions="{section: 'privatenetwork', permissions:['MANAGEATTACHEDSERVER']}" blocked-message="" confirmation-message="APP.DATACENTER.INFRASTRUCTURE.SERVERS.DETAIL.LABEL.REMOVE_VLAN_CONFIRM" refresh-items-event-name="refresh_manage_items_vlans" disabled="disabled">
+                    <div class="block-to-edit-content">
+                        <div class="row">
+                            <div class="col-xs-1 col-sm-1 col-md-1 icon-2">
+                                <span class="icon icon-vlan"></span>
+                            </div>
+                           <div class="col-xs-11 col-sm-11 col-md-11">
+                                <dl>
+                                    <dt class="col-xs-4 col-sm-4 col-md-4">Private networks:</dt>
+                                    <dd class="col-xs-8 col-sm-8 col-md-8">
+                                        <!---->
+                                        <!----><span ng-if="detail.privateNetworks.length == 0">No private network available.</span><!---->
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!---->
+
+                <div class="block block-to-edit permissions-disable" ng-class="{'disabled': list.optionDisabled('monitoringpolicies') , 'loading': detail.disabledMPs}" ng-disabled="list.optionDisabled('monitoringpolicies') || detail.disabledMPs" manage-items="" items="detail.serverMps" item-id="id" check-changes="detail.mpCheckChanges(data)" button-custom-text="APP.DATACENTER.INFRASTRUCTURE.SHAREDSTORAGES.DETAIL.BUTTON.CONFIRM" callback="detail.deleteMPs(data)" input-type="radio" refresh-items-event-name="refresh_manage_items_mps" apply-permissions="{section: 'monitoringpolicies', permissions:['MANAGEATTACHEDSERVER']}">
+                    <div class="block-to-edit-content">
+                        <div class="row">
+                            <div class="col-xs-1 col-sm-1 col-md-1 icon-2">
+                                <span class="icon icon-monitoring"></span>
+                            </div>
+                            <div class="col-xs-11 col-sm-11 col-md-11">
+                                <dl>
+                                    <dt class="col-xs-4 col-sm-4 col-md-4">Monitoring Policies:</dt>
+                                    <dd class="col-xs-8 col-sm-8 col-md-8">
+                                        <!----><a href="" ng-if="detail.monitoringPolicy">
+                                            <!---->
+                                            <!----><span ng-if="detail.monitoringPolicy.default==1">Default Monitoring Policy</span><!---->
+                                        </a><!---->
+                                        <!---->
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            <!----><div class="block block-to-edit" ng-if="detail.server.first_password" ng-class="{'block-to-edit':detail.server.first_password,'disabled': list.optionDisabled('initialpassword')}" ng-click="detail.server.first_password &amp;&amp; !list.optionDisabled('initialpassword') &amp;&amp; detail.openPass($event, 'top', 'sm', 'popover-style-1 edit-ip',detail.server.first_password );">
+                    <div class="block-to-edit-content block-edit-icon-3">
+                        <div class="row">
+                            <div class="col-xs-1 col-sm-1 col-md-1 icon-2">
+                                <span class="icon icon-permission"></span>
+                            </div>
+                            <div class="col-xs-11 col-sm-11 col-md-11">
+                                <dl>
+                                    <dt class="col-xs-4 col-sm-4 col-md-4">Initial Password:</dt>
+                                    <dd class="col-xs-8 col-sm-8 col-md-8">
+                                        <a href="">Show Password</a>
+                                    </dd>
+                                    <!---->
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </div><!---->
+                <!---->
+                <!----><div ng-if="detail.showDc" class="block" element="detail.server" region-description="" left-size="col-xs-1 col-sm-1 col-md-1 icon-2" right-size="col-xs-11 col-sm-11 col-md-11" icon-size="col-xs-4 col-sm-4 col-md-4" text-size="col-xs-8 col-sm-8 col-md-8">
+                <div class="row">
+    <div ng-class="leftSize" class="col-xs-1 col-sm-1 col-md-1 icon-2">
+        <span class="icon icon-region"></span>
+    </div>
+    <div ng-class="rightSize" class="col-xs-11 col-sm-11 col-md-11">
+        <dl>
+            <dt ng-class="iconSize" class="noselect col-xs-4 col-sm-4 col-md-4">Data centre:</dt>
+            <!----><dd ng-class="textSize" ng-if="description" class="col-xs-8 col-sm-8 col-md-8">USA</dd><!---->
+            <!---->
+        </dl>
+    </div>
+</div></div><!---->
+                <div class="block last">
+                    <div class="row">
+                        <div class="col-xs-1 col-sm-1 col-md-1 icon-2">
+                            <span class="icon icon-calendar"></span>
+                        </div>
+                        <div class="col-xs-11 col-sm-11 col-md-11">
+                            <dl>
+                                <dt class="col-xs-4 col-sm-4 col-md-4">Created on:</dt>
+                                <dd class="col-xs-8 col-sm-8 col-md-8">27/04/2017 17:32:19</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-4 permissions-delete" apply-permissions="{section: 'monitoringcenter', permissions:['SHOW']}">
+                <h3 class="block-title"><span>Monitoring</span></h3>
+                <div class="block block-boxs">
+                    <div ng-show="!detail.monitoringPolicy" class="ng-hide">
+                        <p class="bs-example-bg-classes bg-warning">No monitoring policy is active.</p>
+                    </div>
+                    <div ng-show="detail.errorAgent" class="ng-hide">
+                        <p class="bs-example-bg-classes bg-warning">Connection to monitoring agent failed. Make sure that the monitoring agent has been installed and check your network configuration.</p>
+                    </div>
+
+                    <div ng-show="detail.monitoringPolicy &amp;&amp; !detail.errorAgent" loading-animation="detail.loadingChartsPromise" class=""><div ng-show="showAnimation" class="ng-hide" style="">
+    <div class="floatingBarsContent">
+        <div class="blockG" id="rotateG_01"></div>
+        <div class="blockG" id="rotateG_02"></div>
+        <div class="blockG" id="rotateG_03"></div>
+        <div class="blockG" id="rotateG_04"></div>
+        <div class="blockG" id="rotateG_05"></div>
+        <div class="blockG" id="rotateG_06"></div>
+        <div class="blockG" id="rotateG_07"></div>
+        <div class="blockG" id="rotateG_08"></div>
+    </div>
+</div>
+<ng-transclude id="content" style="display: inline;">
+                        <!--CPU CHART-->
+                        <div class="box success" ng-class="{'success':detail.monitoringInfo.cpu.current_state == 0, 'warning':detail.monitoringInfo.cpu.current_state == 1, 'danger':detail.monitoringInfo.cpu.current_state == 2}" style="">
+                            <h4 ng-click="detail.goToMonitoringCharts('cpu')">CPU<span class="glyphicon glyphicon-share-alt pull-right"></span></h4>
+                            <div ng-show="detail.chartCPU" data-highcharts-chart="2" class=""><div class="highcharts-container" id="highcharts-12" style="position: relative; overflow: hidden; width: 292px; height: 250px; text-align: left; line-height: normal; z-index: 0; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); font-weight: normal; font-size: 13px; font-family: &quot;Open Sans&quot;, sans-serif;"><svg version="1.1" style="font-family:Open Sans, sans-serif;font-size:13px;font-weight:normal;" xmlns="http://www.w3.org/2000/svg" width="292" height="250"><desc>Created with Highcharts 4.0.4</desc><defs><clipPath id="highcharts-13"><rect x="0" y="0" width="292" height="215"></rect></clipPath><clipPath id="highcharts-20"><rect x="0" y="0" width="292" height="215"></rect></clipPath><clipPath id="highcharts-21"><rect x="-99" y="-12" width="391" height="250"></rect></clipPath></defs><rect x="0" y="0" width="292" height="250" strokeWidth="0" fill="#fff" class=" highcharts-background"></rect><g class="highcharts-grid" zIndex="1"><path fill="none" d="M 141.95 12 L 141.95 227" stroke="#aaa" stroke-width="0.1" stroke-dasharray="0.1,0.30000000000000004" zIndex="1" opacity="1"></path><path fill="none" d="M 236.95 12 L 236.95 227" stroke="#aaa" stroke-width="0.1" stroke-dasharray="0.1,0.30000000000000004" zIndex="1" opacity="1"></path><path fill="none" d="M 46.95 12 L 46.95 227" stroke="#aaa" stroke-width="0.1" stroke-dasharray="0.1,0.30000000000000004" zIndex="1" opacity="1"></path></g><g class="highcharts-grid" zIndex="1"><path fill="none" d="M 0 227.5 L 292 227.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 216.5 L 292 216.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 206.5 L 292 206.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 195.5 L 292 195.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 184.5 L 292 184.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 173.5 L 292 173.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 163.5 L 292 163.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 152.5 L 292 152.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 141.5 L 292 141.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 130.5 L 292 130.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 120.5 L 292 120.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 109.5 L 292 109.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 98.5 L 292 98.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 87.5 L 292 87.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 77.5 L 292 77.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 66.5 L 292 66.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 55.5 L 292 55.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 44.5 L 292 44.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 34.5 L 292 34.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 23.5 L 292 23.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 11.5 L 292 11.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 11.5 L 292 11.5" stroke="#ddd" stroke-width="1" zIndex="1" opacity="1"></path><path fill="none" d="M 0 66.5 L 292 66.5" stroke="#ddd" stroke-width="1" zIndex="1" opacity="1"></path><path fill="none" d="M 0 120.5 L 292 120.5" stroke="#ddd" stroke-width="1" zIndex="1" opacity="1"></path><path fill="none" d="M 0 173.5 L 292 173.5" stroke="#ddd" stroke-width="1" zIndex="1" opacity="1"></path><path fill="none" d="M 0 227.5 L 292 227.5" stroke="#ddd" stroke-width="1" zIndex="1" opacity="1"></path></g><path fill="none" d="M 0 23.5 L 292 23.5" stroke="rgba(255,0,0,1)" stroke-width="1" zIndex="1"></path><text x="284" text-anchor="end" zIndex="1" transform="translate(0,0)" style="font-size:11px;color:rgba(255,0,0,1);fill:rgba(255,0,0,1);" y="20" visibility="visible"></text><path fill="none" d="M 0 34.5 L 292 34.5" stroke="rgba(255,165,0,1)" stroke-width="1" zIndex="1"></path><text x="284" text-anchor="end" zIndex="1" transform="translate(0,0)" style="font-size:11px;color:rgba(255,165,0,1);fill:rgba(255,165,0,1);" y="31" visibility="visible"></text><g class="highcharts-axis" zIndex="2"><path fill="none" d="M 141.5 227 L 141.5 237" stroke="#ddd" stroke-width="1" opacity="1"></path><path fill="none" d="M 236.5 227 L 236.5 237" stroke="#ddd" stroke-width="1" opacity="1"></path><path fill="none" d="M 46.5 227 L 46.5 237" stroke="#ddd" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 227.5 L 292 227.5" stroke="#aaa" stroke-width="1" zIndex="7" visibility="visible"></path></g><g class="highcharts-axis" zIndex="2"></g><g class="highcharts-series-group" zIndex="3"><g class="highcharts-series" visibility="visible" zIndex="0.1" transform="translate(0,12) scale(1 1)" clip-path="url(#highcharts-13)"><path fill="rgba(46,220,187,0.2)" d="M 256.33496732026146 213.409 L 257.3289760348584 213.09596 L 258.3229847494554 213.93532 L 259.3169934640523 211.9292266666666 L 260.31100217864923 211.9292266666666 L 261.3050108932462 211.9292266666666 L 262.29901960784315 214.12351666666666 L 263.2930283224401 214.12351666666666 L 264.28703703703707 214.43963833333333 L 265.281045751634 214.30598 L 266.2750544662309 214.32948666666667 L 267.2690631808279 20.737825000000015 L 268.26307189542484 206.92933 L 269.2570806100218 206.92933 L 270.25108932461876 206.92933 L 271.2450980392157 214.17339666666666 L 272.2391067538126 214.24850333333333 L 273.2331154684096 214.24850333333333 L 274.22712418300654 213.17930833333335 L 275.22113289760347 214.35156 L 276.21514161220045 214.484 L 277.2091503267974 214.17096 L 278.2031590413944 214.316085 L 279.1971677559913 214.23603333333335 L 280.19117647058823 214.32346666666666 L 281.1851851851852 213.24187333333333 L 282.17919389978215 214.44186 L 283.1732026143791 214.44186 L 284.16721132897607 214.44186 L 285.161220043573 214.542695 L 286.1552287581699 214.1228 L 287.1492374727669 214.26971666666665 L 287.1492374727669 215 L 256.33496732026146 215" zIndex="0"></path><path fill="none" d="M 256.33496732026146 213.409 L 257.3289760348584 213.09596 L 258.3229847494554 213.93532 L 259.3169934640523 211.9292266666666 L 260.31100217864923 211.9292266666666 L 261.3050108932462 211.9292266666666 L 262.29901960784315 214.12351666666666 L 263.2930283224401 214.12351666666666 L 264.28703703703707 214.43963833333333 L 265.281045751634 214.30598 L 266.2750544662309 214.32948666666667 L 267.2690631808279 20.737825000000015 L 268.26307189542484 206.92933 L 269.2570806100218 206.92933 L 270.25108932461876 206.92933 L 271.2450980392157 214.17339666666666 L 272.2391067538126 214.24850333333333 L 273.2331154684096 214.24850333333333 L 274.22712418300654 213.17930833333335 L 275.22113289760347 214.35156 L 276.21514161220045 214.484 L 277.2091503267974 214.17096 L 278.2031590413944 214.316085 L 279.1971677559913 214.23603333333335 L 280.19117647058823 214.32346666666666 L 281.1851851851852 213.24187333333333 L 282.17919389978215 214.44186 L 283.1732026143791 214.44186 L 284.16721132897607 214.44186 L 285.161220043573 214.542695 L 286.1552287581699 214.1228 L 287.1492374727669 214.26971666666665" stroke="#2edcbb" stroke-width="1" zIndex="1" stroke-linejoin="round" stroke-linecap="round"></path><path fill="none" d="M 246.33496732026146 213.409 L 256.33496732026146 213.409 L 257.3289760348584 213.09596 L 258.3229847494554 213.93532 L 259.3169934640523 211.9292266666666 L 260.31100217864923 211.9292266666666 L 261.3050108932462 211.9292266666666 L 262.29901960784315 214.12351666666666 L 263.2930283224401 214.12351666666666 L 264.28703703703707 214.43963833333333 L 265.281045751634 214.30598 L 266.2750544662309 214.32948666666667 L 267.2690631808279 20.737825000000015 L 268.26307189542484 206.92933 L 269.2570806100218 206.92933 L 270.25108932461876 206.92933 L 271.2450980392157 214.17339666666666 L 272.2391067538126 214.24850333333333 L 273.2331154684096 214.24850333333333 L 274.22712418300654 213.17930833333335 L 275.22113289760347 214.35156 L 276.21514161220045 214.484 L 277.2091503267974 214.17096 L 278.2031590413944 214.316085 L 279.1971677559913 214.23603333333335 L 280.19117647058823 214.32346666666666 L 281.1851851851852 213.24187333333333 L 282.17919389978215 214.44186 L 283.1732026143791 214.44186 L 284.16721132897607 214.44186 L 285.161220043573 214.542695 L 286.1552287581699 214.1228 L 287.1492374727669 214.26971666666665 L 297.1492374727669 214.26971666666665" stroke-linejoin="round" visibility="visible" stroke="rgba(192,192,192,0.0001)" stroke-width="21" zIndex="2" class=" highcharts-tracker" style=""></path></g><g class="highcharts-markers highcharts-tracker" visibility="visible" zIndex="0.1" transform="translate(0,12) scale(1 1)" clip-path="none" style=""></g></g><g class="highcharts-axis-labels highcharts-xaxis-labels" zIndex="7"><text x="46.59912854030501" text-anchor="middle" style="color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="247" opacity="1"><tspan>27. Apr</tspan></text><text x="142.0239651416122" text-anchor="middle" style="color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="247" opacity="1">08:00</text><text x="237.4488017429194" text-anchor="middle" style="color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="247" opacity="1">16:00</text></g><g class="highcharts-axis-labels highcharts-yaxis-labels" zIndex="7"><text x="0" text-anchor="start" style="width:76px;color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="-9999">0%</text><text x="2" text-anchor="start" style="width:76px;color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="185.25" opacity="1">25%</text><text x="2" text-anchor="start" style="width:76px;color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="131.5" opacity="1">50%</text><text x="2" text-anchor="start" style="width:76px;color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="77.75" opacity="1">75%</text><text x="2" text-anchor="start" style="width:76px;color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="24" opacity="1">100%</text></g><g class="highcharts-tooltip" zIndex="8" style="cursor:default;padding:0;white-space:nowrap;" transform="translate(0,-9999)"><path fill="none" d="M 3 0 L 17 0 C 20 0 20 0 20 3 L 20 17 C 20 20 20 20 17 20 L 3 20 C 0 20 0 20 0 17 L 0 3 C 0 0 0 0 3 0" isShadow="true" stroke="black" stroke-opacity="0.049999999999999996" stroke-width="5" transform="translate(1, 1)"></path><path fill="none" d="M 3 0 L 17 0 C 20 0 20 0 20 3 L 20 17 C 20 20 20 20 17 20 L 3 20 C 0 20 0 20 0 17 L 0 3 C 0 0 0 0 3 0" isShadow="true" stroke="black" stroke-opacity="0.09999999999999999" stroke-width="3" transform="translate(1, 1)"></path><path fill="none" d="M 3 0 L 17 0 C 20 0 20 0 20 3 L 20 17 C 20 20 20 20 17 20 L 3 20 C 0 20 0 20 0 17 L 0 3 C 0 0 0 0 3 0" isShadow="true" stroke="black" stroke-opacity="0.15" stroke-width="1" transform="translate(1, 1)"></path><path fill="rgba(249, 249, 249, .85)" d="M 3 0 L 17 0 C 20 0 20 0 20 3 L 20 17 C 20 20 20 20 17 20 L 3 20 C 0 20 0 20 0 17 L 0 3 C 0 0 0 0 3 0"></path><text x="10" zIndex="1" style="font-size:12px;color:#646e80;fill:#646e80;" y="23"></text></g></svg></div></div>
+                            <p class="description">
+                                <strong>Last status:</strong><br>
+                                <span>OK: 0.33% used</span>
+                            </p>
+                        </div>
+                        <!--RAM CHART-->
+                        <div class="box success" ng-class="{'success':detail.monitoringInfo.ram.current_state == 0, 'warning':detail.monitoringInfo.ram.current_state == 1, 'danger':detail.monitoringInfo.ram.current_state == 2}">
+                            <h4 ng-click="detail.goToMonitoringCharts('ram')">RAM<span class="glyphicon glyphicon-share-alt pull-right"></span></h4>
+                            <div ng-show="detail.chartRAM" data-highcharts-chart="3" class=""><div class="highcharts-container" id="highcharts-16" style="position: relative; overflow: hidden; width: 292px; height: 250px; text-align: left; line-height: normal; z-index: 0; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); font-weight: normal; font-size: 13px; font-family: &quot;Open Sans&quot;, sans-serif;"><svg version="1.1" style="font-family:Open Sans, sans-serif;font-size:13px;font-weight:normal;" xmlns="http://www.w3.org/2000/svg" width="292" height="250"><desc>Created with Highcharts 4.0.4</desc><defs><clipPath id="highcharts-17"><rect x="0" y="0" width="292" height="215"></rect></clipPath><clipPath id="highcharts-22"><rect x="0" y="0" width="292" height="215"></rect></clipPath><clipPath id="highcharts-23"><rect x="-99" y="-12" width="391" height="250"></rect></clipPath></defs><rect x="0" y="0" width="292" height="250" strokeWidth="0" fill="#fff" class=" highcharts-background"></rect><g class="highcharts-grid" zIndex="1"><path fill="none" d="M 141.95 12 L 141.95 227" stroke="#aaa" stroke-width="0.1" stroke-dasharray="0.1,0.30000000000000004" zIndex="1" opacity="1"></path><path fill="none" d="M 236.95 12 L 236.95 227" stroke="#aaa" stroke-width="0.1" stroke-dasharray="0.1,0.30000000000000004" zIndex="1" opacity="1"></path><path fill="none" d="M 46.95 12 L 46.95 227" stroke="#aaa" stroke-width="0.1" stroke-dasharray="0.1,0.30000000000000004" zIndex="1" opacity="1"></path></g><g class="highcharts-grid" zIndex="1"><path fill="none" d="M 0 227.5 L 292 227.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 216.5 L 292 216.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 206.5 L 292 206.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 195.5 L 292 195.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 184.5 L 292 184.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 173.5 L 292 173.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 163.5 L 292 163.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 152.5 L 292 152.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 141.5 L 292 141.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 130.5 L 292 130.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 120.5 L 292 120.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 109.5 L 292 109.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 98.5 L 292 98.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 87.5 L 292 87.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 77.5 L 292 77.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 66.5 L 292 66.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 55.5 L 292 55.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 44.5 L 292 44.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 34.5 L 292 34.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 23.5 L 292 23.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 11.5 L 292 11.5" stroke="#eee" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 11.5 L 292 11.5" stroke="#ddd" stroke-width="1" zIndex="1" opacity="1"></path><path fill="none" d="M 0 66.5 L 292 66.5" stroke="#ddd" stroke-width="1" zIndex="1" opacity="1"></path><path fill="none" d="M 0 120.5 L 292 120.5" stroke="#ddd" stroke-width="1" zIndex="1" opacity="1"></path><path fill="none" d="M 0 173.5 L 292 173.5" stroke="#ddd" stroke-width="1" zIndex="1" opacity="1"></path><path fill="none" d="M 0 227.5 L 292 227.5" stroke="#ddd" stroke-width="1" zIndex="1" opacity="1"></path></g><path fill="none" d="M 0 23.5 L 292 23.5" stroke="rgba(255,0,0,1)" stroke-width="1" zIndex="1"></path><text x="284" text-anchor="end" zIndex="1" transform="translate(0,0)" style="font-size:11px;color:rgba(255,0,0,1);fill:rgba(255,0,0,1);" y="20" visibility="visible"></text><path fill="none" d="M 0 34.5 L 292 34.5" stroke="rgba(255,165,0,1)" stroke-width="1" zIndex="1"></path><text x="284" text-anchor="end" zIndex="1" transform="translate(0,0)" style="font-size:11px;color:rgba(255,165,0,1);fill:rgba(255,165,0,1);" y="31" visibility="visible"></text><g class="highcharts-axis" zIndex="2"><path fill="none" d="M 141.5 227 L 141.5 237" stroke="#ddd" stroke-width="1" opacity="1"></path><path fill="none" d="M 236.5 227 L 236.5 237" stroke="#ddd" stroke-width="1" opacity="1"></path><path fill="none" d="M 46.5 227 L 46.5 237" stroke="#ddd" stroke-width="1" opacity="1"></path><path fill="none" d="M 0 227.5 L 292 227.5" stroke="#aaa" stroke-width="1" zIndex="7" visibility="visible"></path></g><g class="highcharts-axis" zIndex="2"></g><g class="highcharts-series-group" zIndex="3"><g class="highcharts-series" visibility="visible" zIndex="0.1" transform="translate(0,12) scale(1 1)" clip-path="url(#highcharts-17)"><path fill="rgba(137,137,233,0.2)" d="M 256.33496732026146 62.371500000000026 L 257.3289760348584 111.284 L 258.3229847494554 176.6655 L 259.3169934640523 187.00461111111136 L 260.31100217864923 187.00461111111136 L 261.3050108932462 187.00461111111136 L 262.29901960784315 170.61683333333406 L 263.2930283224401 170.61683333333406 L 264.28703703703707 200.94616666666658 L 265.281045751634 212.0975 L 266.2750544662309 203.1248333333334 L 267.2690631808279 198.20850000000002 L 268.26307189542484 208.249 L 269.2570806100218 208.249 L 270.25108932461876 208.249 L 271.2450980392157 208.5715 L 272.2391067538126 194.2238333333334 L 273.2331154684096 194.2238333333334 L 274.22712418300654 195.4636666666666 L 275.22113289760347 201.5195 L 276.21514161220045 192.80483333333405 L 277.2091503267974 193.328 L 278.2031590413944 197.4345 L 279.1971677559913 205.6188333333334 L 280.19117647058823 212.2695 L 281.1851851851852 199.2261666666666 L 282.17919389978215 206.15394444444453 L 283.1732026143791 206.15394444444453 L 284.16721132897607 206.15394444444453 L 285.161220043573 198.59550000000002 L 286.1552287581699 207.4965 L 287.1492374727669 204.6871666666666 L 287.1492374727669 215 L 256.33496732026146 215" zIndex="0"></path><path fill="none" d="M 256.33496732026146 62.371500000000026 L 257.3289760348584 111.284 L 258.3229847494554 176.6655 L 259.3169934640523 187.00461111111136 L 260.31100217864923 187.00461111111136 L 261.3050108932462 187.00461111111136 L 262.29901960784315 170.61683333333406 L 263.2930283224401 170.61683333333406 L 264.28703703703707 200.94616666666658 L 265.281045751634 212.0975 L 266.2750544662309 203.1248333333334 L 267.2690631808279 198.20850000000002 L 268.26307189542484 208.249 L 269.2570806100218 208.249 L 270.25108932461876 208.249 L 271.2450980392157 208.5715 L 272.2391067538126 194.2238333333334 L 273.2331154684096 194.2238333333334 L 274.22712418300654 195.4636666666666 L 275.22113289760347 201.5195 L 276.21514161220045 192.80483333333405 L 277.2091503267974 193.328 L 278.2031590413944 197.4345 L 279.1971677559913 205.6188333333334 L 280.19117647058823 212.2695 L 281.1851851851852 199.2261666666666 L 282.17919389978215 206.15394444444453 L 283.1732026143791 206.15394444444453 L 284.16721132897607 206.15394444444453 L 285.161220043573 198.59550000000002 L 286.1552287581699 207.4965 L 287.1492374727669 204.6871666666666" stroke="#8989e9" stroke-width="1" zIndex="1" stroke-linejoin="round" stroke-linecap="round"></path><path fill="none" d="M 246.33496732026146 62.371500000000026 L 256.33496732026146 62.371500000000026 L 257.3289760348584 111.284 L 258.3229847494554 176.6655 L 259.3169934640523 187.00461111111136 L 260.31100217864923 187.00461111111136 L 261.3050108932462 187.00461111111136 L 262.29901960784315 170.61683333333406 L 263.2930283224401 170.61683333333406 L 264.28703703703707 200.94616666666658 L 265.281045751634 212.0975 L 266.2750544662309 203.1248333333334 L 267.2690631808279 198.20850000000002 L 268.26307189542484 208.249 L 269.2570806100218 208.249 L 270.25108932461876 208.249 L 271.2450980392157 208.5715 L 272.2391067538126 194.2238333333334 L 273.2331154684096 194.2238333333334 L 274.22712418300654 195.4636666666666 L 275.22113289760347 201.5195 L 276.21514161220045 192.80483333333405 L 277.2091503267974 193.328 L 278.2031590413944 197.4345 L 279.1971677559913 205.6188333333334 L 280.19117647058823 212.2695 L 281.1851851851852 199.2261666666666 L 282.17919389978215 206.15394444444453 L 283.1732026143791 206.15394444444453 L 284.16721132897607 206.15394444444453 L 285.161220043573 198.59550000000002 L 286.1552287581699 207.4965 L 287.1492374727669 204.6871666666666 L 297.1492374727669 204.6871666666666" stroke-linejoin="round" visibility="visible" stroke="rgba(192,192,192,0.0001)" stroke-width="21" zIndex="2" class=" highcharts-tracker" style=""></path></g><g class="highcharts-markers highcharts-tracker" visibility="visible" zIndex="0.1" transform="translate(0,12) scale(1 1)" clip-path="none" style=""></g></g><g class="highcharts-axis-labels highcharts-xaxis-labels" zIndex="7"><text x="46.59912854030501" text-anchor="middle" style="color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="247" opacity="1"><tspan>27. Apr</tspan></text><text x="142.0239651416122" text-anchor="middle" style="color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="247" opacity="1">08:00</text><text x="237.4488017429194" text-anchor="middle" style="color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="247" opacity="1">16:00</text></g><g class="highcharts-axis-labels highcharts-yaxis-labels" zIndex="7"><text x="0" text-anchor="start" style="width:76px;color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="-9999">0%</text><text x="2" text-anchor="start" style="width:76px;color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="185.25" opacity="1">25%</text><text x="2" text-anchor="start" style="width:76px;color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="131.5" opacity="1">50%</text><text x="2" text-anchor="start" style="width:76px;color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="77.75" opacity="1">75%</text><text x="2" text-anchor="start" style="width:76px;color:#646e80;cursor:default;font-size:11px;font-weight:normal;fill:#646e80;" y="24" opacity="1">100%</text></g><g class="highcharts-tooltip" zIndex="8" style="cursor:default;padding:0;white-space:nowrap;" transform="translate(0,-9999)"><path fill="none" d="M 3 0 L 17 0 C 20 0 20 0 20 3 L 20 17 C 20 20 20 20 17 20 L 3 20 C 0 20 0 20 0 17 L 0 3 C 0 0 0 0 3 0" isShadow="true" stroke="black" stroke-opacity="0.049999999999999996" stroke-width="5" transform="translate(1, 1)"></path><path fill="none" d="M 3 0 L 17 0 C 20 0 20 0 20 3 L 20 17 C 20 20 20 20 17 20 L 3 20 C 0 20 0 20 0 17 L 0 3 C 0 0 0 0 3 0" isShadow="true" stroke="black" stroke-opacity="0.09999999999999999" stroke-width="3" transform="translate(1, 1)"></path><path fill="none" d="M 3 0 L 17 0 C 20 0 20 0 20 3 L 20 17 C 20 20 20 20 17 20 L 3 20 C 0 20 0 20 0 17 L 0 3 C 0 0 0 0 3 0" isShadow="true" stroke="black" stroke-opacity="0.15" stroke-width="1" transform="translate(1, 1)"></path><path fill="rgba(249, 249, 249, .85)" d="M 3 0 L 17 0 C 20 0 20 0 20 3 L 20 17 C 20 20 20 20 17 20 L 3 20 C 0 20 0 20 0 17 L 0 3 C 0 0 0 0 3 0"></path><text x="10" zIndex="1" style="font-size:12px;color:#646e80;fill:#646e80;" y="23"></text></g></svg></div></div>
+                            <p class="description">
+                                <strong>Last status:</strong><br>
+                                <span>OK: 4.99% used</span>
+                            </p>
+                        </div>
+                    </ng-transclude></div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+<element-history items="detail.server.last_logs" elementid="detail.server.id"><!----><div class="details permissions-delete" id="history-server" ng-if="items &amp;&amp; items.length>0" apply-permissions="{section: 'logs', permissions:['SHOW']}">
+  <div class="wrapper">
+    <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+            <h3 class="block-title"><span>History</span></h3>
+            <div class="block">
+              <table class="table table-condensed">
+                  <thead>
+                      <tr>
+                          <th colspan="2">Action</th>
+                          <th>Date</th>
+                          <th>Duration</th>
+                          <th>Status</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      <!----><tr ng-repeat="item in items">
+                          <td><span class="glyphicon glyphicon-plus" ng-class="::returnGlyphiconClass(item.action)"></span></td>
+                          <td><a ng-click="goToLogDetail(item)">Creating server</a></td>
+                          <td>04/27/2017 17:32:19</td>
+                          <td>55sec</td>
+                          <td>
+                              <span class="label label-success" ng-class=" item.result| classByState:'logs'" uib-tooltip="Completed" tooltip-placement="right">
+                              </span>
+                          </td>
+                      </tr><!---->
+                  </tbody>
+              </table>
+            </div>
+        </div>
+    </div>
+  </div>
+</div><!----></element-history>
+</div>
+</div>

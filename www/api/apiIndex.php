@@ -185,6 +185,36 @@ $app->get( '/firewall_policies', function() use ( $app, $url ) {
     curl_close($request);
 } );
 
+/**
+ *  SHARED STORAGE.
+ */
+$app->get( '/shared_storages', function() use ( $app, $url ) {
+    $body  = json_decode( $app->request->getBody() );
+    // $TOKEN = $body->token;
+    $TOKEN = $app->request->headers->get('X-TOKEN');
+    $_command = $url . "/shared_storages";
+    $request = curl_init();
+
+    //Set options
+    curl_setopt($request, CURLOPT_URL, $_command);
+    curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($request, CURLOPT_HTTPHEADER, array("X-TOKEN:$TOKEN", "Content-Type:application/json"));
+    curl_setopt($request, CURLOPT_CUSTOMREQUEST, "GET");
+
+    //Try to get the response
+    $response  = curl_exec( $request );
+    $curl_info = curl_getinfo( $request );
+
+    if ( $curl_info[ 'http_code' ] !== 200 ){
+        $app->render( null, array( 'Unauthorized' ), 401 );
+    } else{
+        $formatResponse = getBodyJsonDecoded( $response );
+        $app->render( null, $formatResponse, 200 );
+    }
+
+    curl_close($request);
+} );
+
 /*
  *  LOGIN.
  */
