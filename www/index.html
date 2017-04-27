@@ -2,7 +2,7 @@
 <html ng-app="hackApp">
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.3/angular.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.3/angular-resource.js""></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.3/angular-resource.js"></script>
 
         <!-- <script src="https://unpkg.com/angular-ui-router@0.2.18/release/angular-ui-router.min.js"></script> -->
         <script src="https://unpkg.com/angular-ui-router@0.3.2/release/angular-ui-router.min.js"></script>
@@ -22,23 +22,15 @@
         <script src="./app/app.js"></script>
         <script src="./app/login/controllers/loginControllers.js"></script>
         <script src="./app/dashboard/controllers/dashboardControllers.js"></script>
+        <script src="./app/servers/controllers/serverControllers.js"></script>
         <script src="./app/common/services/apiServices.js"></script>
         <script src="./app/common/services/authServices.js"></script>
         <!-- <base href="/index.html"> -->
     </head>
 
-    <!-- <body ng-app="hackApp" style="background-image: url(https://ce2.uicdn.net/30c/32e9ccab475ace1664888f71cecbb/webapp/13736-cloud-server-INT.jpg);"> -->
-    <body ng-app="hackApp" >
-        <header class="business-header">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <h1 class="tagline"></h1>
-                    </div>
-                    <logout-control><!-- ngIf: username --></logout-control>
-                </div>
-            </div>
-        </header>
+    <body ng-app="hackApp" style="background-image: url(https://ce2.uicdn.net/30c/32e9ccab475ace1664888f71cecbb/webapp/13736-cloud-server-INT.jpg);">
+    <!-- <body ng-app="hackApp" > -->
+        
         <div id="mainSection" ui-view="mainSection" class="main-panel">
 
         </div>

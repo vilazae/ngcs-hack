@@ -8,6 +8,7 @@ hackApp.controller( 'LoginController', [ 'AuthService', '$state', function ( Aut
 		AuthService.login( me.apiToken )
 		.then( function ( ) {
 			me.error = undefined;
+			$('body').css('background-image','')
 			$state.go( 'dashboard' );
 		} )
 		.catch(function ( ) {

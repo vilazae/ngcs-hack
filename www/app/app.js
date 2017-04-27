@@ -30,7 +30,18 @@ hackApp.config( [ '$stateProvider', '$urlRouterProvider', '$locationProvider', '
     .state( 'dashboard', {
         url     : "/dashboard",
         views   : {
-            "mainSection" : { templateUrl : "/ngcs/www/app/dashboard/partials/resume.html", controller : 'DashboardController as ctrl' }
+            // "mainSection" : { templateUrl : "/www/app/dashboard/partials/resume.html", controller : 'DashboardController as ctrl' }
+            "mainSection" : { templateUrl : "/www/app/dash/pages/index.html", controller : 'DashboardController as ctrl' }
+        }
+        // ,
+        // resolve : {
+        // }
+    } )
+    .state( 'servers', {
+        url     : "/servers",
+        views   : {
+            // "mainSection" : { templateUrl : "/www/app/dashboard/partials/resume.html", controller : 'DashboardController as ctrl' }
+            "mainSection" : { templateUrl : "/www/app/servers/partials/list.html", controller : 'ServersController as ctrl' }
         }
         // ,
         // resolve : {
