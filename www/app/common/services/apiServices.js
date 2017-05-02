@@ -20,7 +20,20 @@ hackApp.service( 'ApiService', [ '$resource', function ( $resource ) {
                 var info = { };
                 return angular.toJson( info );
             },
-            isArray : true
+            isArray : true,
+            ignoreLoadingBar: true
+        },
+        restartServer : {
+            url     :  'http://74.208.124.117/www/api/apiIndex.php/servers/:id/restart',
+            method  : 'PUT',
+            params  : {
+                id : '@id'
+            },
+            transformRequest : function ( data ) {
+                var info = { action: 'restart' };
+                return angular.toJson( info );
+            },
+            isArray : false
         },
         listLoadBalancers : {
             url     :  'http://74.208.124.117/www/api/apiIndex.php/load_balancers',
