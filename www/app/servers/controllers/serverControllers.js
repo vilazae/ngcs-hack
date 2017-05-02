@@ -1,25 +1,23 @@
-hackApp.controller( 'ServersController', [ 'AuthService', '$state', 'ApiService', function ( AuthService, $state, ApiService ) {
-console.log('servers')
+hackApp.controller( 'ServersController', [ 'AuthService', '$state', 'ApiService', '$interval', '$filter', '$scope', function ( AuthService, $state, ApiService, $interval, $filter, $scope ) {
 	var me = this;
+
 	ApiService.listServers().$promise
 	.then( function (response ) {
-console.log('response -- ',  angular.copy(response));
 		me.servers = response;
 	} )
 	.catch( function ( error ) {
-console.log('error -- ',  angular.copy(error));
 	} );
 	me.showMenu = false;
 
-	me.restarList = function () {
+	me.restartServers = function () {
 		angular.forEach( me.servers, function (server){
 			if (server.selected){
-				// ApiService.restartServer().$promise
-				// .then( function (response) {
-				// 	console.log(response)
-				// }).catch( function (error) {
-				// 	console.log(error)
-				// })
+				ApiService.restartServer( { id: server.id } ).$promise
+				.then( function (response) {
+					// console.log(response)
+				}).catch( function (error) {
+					// console.log(error)
+				})
 			}
 		})
 	}
@@ -31,4 +29,22 @@ console.log('error -- ',  angular.copy(error));
 			server.selected = !server.selected;
 		}
 	}
+
+	var interval = $interval( function () {
+		ApiService.listServers().$promise
+		.then( function ( response ) {
+			angular.forEach( response, function ( server ){
+				var _tmp = $filter('filter')( me.servers, { id: server.id }, true);
+				_tmp[0].status.state = server.status.state;
+			} );
+		} )
+	}, 2000);
+
+	$scope.$on("$destroy", function() {
+        if (interval) {
+            $interval.cancel(interval);
+        }
+    });
+
+
 } ] );

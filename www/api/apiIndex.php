@@ -125,6 +125,38 @@ $app->get( '/servers', function() use ( $app, $url ) {
     curl_close($request);
 } );
 
+$app->put( '/servers/:id/restart', function( $id ) use ( $app, $url ) {
+    $body  = json_decode( $app->request->getBody() );
+    // $TOKEN = $body->token;
+    $TOKEN = $app->request->headers->get('X-TOKEN');
+    $data = array( 'action'=>'REBOOT', 'method'=>'SOFTWARE' );
+    $data = json_encode($data);
+    $_command = $url . "/servers/$id/status/action";
+    $request = curl_init();
+
+    //Set options
+    curl_setopt($request, CURLOPT_URL, $_command);
+    curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($request, CURLOPT_HTTPHEADER, array("X-TOKEN:$TOKEN", "Content-type:application/json"));
+    // curl_setopt($request, CURLOPT_HTTPHEADER, array("X-TOKEN:$TOKEN"));
+    curl_setopt($request, CURLOPT_CUSTOMREQUEST, "PUT");
+    //Add parameters
+    curl_setopt($request, CURLOPT_POSTFIELDS, $data);
+
+    //Try to get the response
+    $response  = curl_exec( $request );
+    $curl_info = curl_getinfo( $request );
+
+    if ( $curl_info[ 'http_code' ] !== 202 ){
+        $app->render( null, array( 'Unauthorized' ), 401 );
+    } else{
+        $formatResponse = getBodyJsonDecoded( $response );
+        $app->render( null, $formatResponse, 200 );
+    }
+
+    curl_close($request);
+} );
+
 /**
  *  LOAD BALANCERS.
  */

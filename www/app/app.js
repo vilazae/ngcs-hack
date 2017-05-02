@@ -1,8 +1,6 @@
-var hackApp = angular.module('hackApp', [ 'ui.router', 'ngResource', 'angular-loading-bar' ] );
+var hackApp = angular.module('hackApp', [ 'ui.router', 'ngResource', 'angular-loading-bar', 'ngCookies' ] );
 
 hackApp.config( [ '$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider', function( $stateProvider, $urlRouterProvider, $locationProvider, $httpProvider ) {
-    console.log('config')
-    console.log('$urlRouterProvider -- ',  angular.copy($urlRouterProvider));
 
     $locationProvider.html5Mode( {
         // enabled: true,
@@ -10,12 +8,7 @@ hackApp.config( [ '$stateProvider', '$urlRouterProvider', '$locationProvider', '
     } )
     .hashPrefix('*');
 
-
-
     $httpProvider.interceptors.push( 'RequestInterceptorFactory' );
-
-
-
 
     $stateProvider
     .state( 'login', {
@@ -30,7 +23,6 @@ hackApp.config( [ '$stateProvider', '$urlRouterProvider', '$locationProvider', '
     .state( 'dashboard', {
         url     : "/dashboard",
         views   : {
-            // "mainSection" : { templateUrl : "/www/app/dashboard/partials/resume.html", controller : 'DashboardController as ctrl' }
             "mainSection" : { templateUrl : "/www/app/dash/pages/index.html", controller : 'DashboardController as ctrl' }
         }
         // ,
@@ -40,7 +32,6 @@ hackApp.config( [ '$stateProvider', '$urlRouterProvider', '$locationProvider', '
     .state( 'servers', {
         url     : "/servers",
         views   : {
-            // "mainSection" : { templateUrl : "/www/app/dashboard/partials/resume.html", controller : 'DashboardController as ctrl' }
             "mainSection" : { templateUrl : "/www/app/servers/partials/list.html", controller : 'ServersController as ctrl' }
         }
         // ,
@@ -50,36 +41,44 @@ hackApp.config( [ '$stateProvider', '$urlRouterProvider', '$locationProvider', '
 
 } ] );
 
-hackApp.run( [ '$state', function ( $state ) {
+hackApp.run( [ '$state', '$injector', '$rootScope', function ( $state, $injector, $rootScope ) {
+    var AuthService = $injector.get( 'AuthService' );
+    var cookies     = $injector.get( '$cookies' );
+    var cookieToken = cookies.get("u-token");
+
+    if ( cookieToken ) {
+        AuthService.setToken( cookieToken );
+    }
+
+
+    $rootScope.$on( '$stateChangeStart', function ( event, toState, toParams, fromState, fromParams ) {
+        if ( toState.name === 'login' ) {
+            console.log('login!')
+            $('body').css('background-image', 'url(' + 'https://ce2.uicdn.net/30c/32e9ccab475ace1664888f71cecbb/webapp/13736-cloud-server-INT.jpg' + ')');
+        } else {
+            console.log('NO login!')
+            $('body').css('background-image','')
+
+        }
+    } );
+
+
     $state.go('login');
-    console.log('run')
+
+
 } ] );
 
 hackApp.factory( 'RequestInterceptorFactory', [ '$q', '$injector', function ( $q, $injector ) {
     return {
         request         : function ( config ) {
 
-        // if ( cookiePanel && cookiePanel['X-XSRF-TOKEN'] && AppConfigurationProvider.get( 'privateKey' ) ) {
-        //     AppsConsoleProvider.debug( "RequestInterceptorFactory::request", "Incluir control en el header" );
-        //     config.headers['X-MICROTIME'] = timestamp;
-        //     config.headers['X-HASH']      = getHMAC( cookiePanel['X-XSRF-TOKEN'], timestamp );
-        // }
-        AuthService = $injector.get( 'AuthService' );
-console.log( AuthService.isLogged() )
-        if ( AuthService.isLogged() ) {
-            config.headers['X-TOKEN']     = AuthService.getToken();
-        }
+            var AuthService = $injector.get( 'AuthService' );
 
-console.log('config -- ',  angular.copy(config));
+            if ( AuthService.isLogged() ) {
+                config.headers['X-TOKEN']     = AuthService.getToken();
+            }
+
             return config || $q.when( config );
         }
     };
 } ] );
-
-
-
-
-
-
-
-
