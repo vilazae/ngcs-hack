@@ -1,0 +1,45 @@
+<!doctype html>
+<html ng-app="hackApp">
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.3/angular.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.3/angular-resource.js""></script>
+
+        <!-- <script src="https://unpkg.com/angular-ui-router@0.2.18/release/angular-ui-router.min.js"></script> -->
+        <script src="https://unpkg.com/angular-ui-router@0.3.2/release/angular-ui-router.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+        <!-- angular-loading-bar -->
+        <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/angular-loading-bar/0.9.0/loading-bar.min.css' type='text/css' media='all' />
+        <script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/angular-loading-bar/0.9.0/loading-bar.min.js'></script>
+
+        <!-- Latest compiled and minified JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+        <!-- App source -->
+        <script src="./app/app.js"></script>
+        <script src="./app/login/controllers/loginControllers.js"></script>
+        <script src="./app/dashboard/controllers/dashboardControllers.js"></script>
+        <script src="./app/common/services/apiServices.js"></script>
+        <script src="./app/common/services/authServices.js"></script>
+        <!-- <base href="/index.html"> -->
+    </head>
+
+    <body ng-app="hackApp">
+        <header class="business-header">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="tagline"></h1>
+                    </div>
+                    <logout-control><!-- ngIf: username --></logout-control>
+                </div>
+            </div>
+        </header>
+        <div id="mainSection" ui-view="mainSection" class="main-panel">
+
+        </div>
+    </body>
+</html>
